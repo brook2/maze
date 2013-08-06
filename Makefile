@@ -4,6 +4,7 @@ clean:
 	rm main.o
 	rm quaternion.o
 	rm maze.o
+	rm maze
 
 maze: main.o quaternion.o maze.o
 	gcc -o maze `sdl-config --libs` `pkg-config --libs gl glu` main.o quaternion.o maze.o

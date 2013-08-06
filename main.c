@@ -22,7 +22,7 @@ void init(void) {
   
   //
   
-  glClearColor(0, 0, 0, 0);
+  glClearColor(0.1, 0, 0.3, 0);
   glEnable(GL_FLAT);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_CULL_FACE);
@@ -93,6 +93,11 @@ void draw_wall(cube_side dir) {
   }
 }
 
+void update(float dt) {
+  //printf("%f\n", dt);
+  t += dt*60;
+}
+
 void draw(void) {
   int x,y,z;
   cube_side d;
@@ -100,9 +105,10 @@ void draw(void) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   
   glLoadIdentity();
-  glTranslatef(0,0,-10);
-  glRotatef(t,0,1,0.01);
-  glTranslatef(-m.w/2.0,-m.h/2.0,-m.d/2.0);
+  glTranslatef(0,0,-7);
+  glRotatef(t,0,1,0);
+  glRotatef(t,0,0,0.3);
+  glTranslatef(-(m.w-1)/2.0,-(m.h-1)/2.0,-(m.d-1)/2.0);
   
   for(x=0; x<m.w; x++) {
     for(y=0; y<m.h; y++) {
@@ -120,14 +126,8 @@ void draw(void) {
       }
     }
   }
-  printf("\n");
   
   SDL_GL_SwapBuffers();
-}
-
-void update(float dt) {
-  //printf("%f\n", dt);
-  t += dt*30;
 }
 
 void handle_event(SDL_Event event) {

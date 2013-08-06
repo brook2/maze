@@ -5,12 +5,12 @@ int cell_array(int w,int h,int x,int y,int z) {
 }
 
 neighbour directions[6] = {
-  {cube_front,0,0,1}, // correct?
-  {cube_back,0,-1},
+  {cube_front,0,0,-1},
+  {cube_back,0,0,1},
   {cube_left,-1,0,0},
   {cube_right,1,0,0},
-  {cube_top,0,-1,0},
-  {cube_bottom,0,1,0},
+  {cube_top,0,1,0},
+  {cube_bottom,0,-1,0},
 };
 
 cube_side direction_opposite(cube_side side) {
