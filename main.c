@@ -4,258 +4,134 @@
 #include "SDL.h"
 
 #include "quaternion.h"
+#include "maze.h"
 
-// note: what happens when the main loop is running slightly slower than the delay we wanted to reach has not been tested (we want to get a slightly slower framerate than usual but still moving at the same speed)
+int tabbed_out;
 
-// need to make rotation based on quaternions
-// and movement based on those
+maze m;
 
-float pitch, yaw, roll;
-float xpos, ypos, zpos;
-int forwardkey, backkey, leftkey, rightkey, upkey, downkey, banklkey, bankrkey;
-
-quaternion q, q1, q2, q3, q4;
-GLfloat m[16];
-
-static void draw_screen( void )
-{
-    /* Our angle of rotation. */
-    static float angle = 0.0f;
-
-    /*
-     * EXERCISE:
-     * Replace this awful mess with vertex
-     * arrays and a call to glDrawElements.
-     *
-     * EXERCISE:
-     * After completing the above, change
-     * it to use compiled vertex arrays.
-     *
-     * EXERCISE:
-     * Verify my windings are correct here ;).
-     */
-    static GLfloat v0[] = { -1.0f, -1.0f,  1.0f };
-    static GLfloat v1[] = {  1.0f, -1.0f,  1.0f };
-    static GLfloat v2[] = {  1.0f,  1.0f,  1.0f };
-    static GLfloat v3[] = { -1.0f,  1.0f,  1.0f };
-    static GLfloat v4[] = { -1.0f, -1.0f, -1.0f };
-    static GLfloat v5[] = {  1.0f, -1.0f, -1.0f };
-    static GLfloat v6[] = {  1.0f,  1.0f, -1.0f };
-    static GLfloat v7[] = { -1.0f,  1.0f, -1.0f };
-    static GLubyte red[]    = { 255,   0,   0, 255 };
-    static GLubyte green[]  = {   0, 255,   0, 255 };
-    static GLubyte blue[]   = {   0,   0, 255, 255 };
-    static GLubyte white[]  = { 255, 255, 255, 255 };
-    static GLubyte yellow[] = {   0, 255, 255, 255 };
-    static GLubyte black[]  = {   0,   0,   0, 255 };
-    static GLubyte orange[] = { 255, 255,   0, 255 };
-    static GLubyte purple[] = { 255,   0, 255,   0 };
-
-    /* Clear the color and depth buffers. */
-    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    glEnable( GL_DEPTH_TEST );
-
-    /* We don't want to modify the projection matrix. */
-    glMatrixMode( GL_MODELVIEW );
-    glLoadIdentity( );
-
-    /* Move down the z-axis. */
-    /* Rotate. */
-    //glRotatef( pitch, 1.0, 0.0, 0.0 );
-    //glRotatef( yaw, 0.0, 1.0, 0.0 );
-    q1 = quaternion_axis_angle(1, 0, 0, pitch*2*3.14159*(1/360.0));
-    q2 = quaternion_axis_angle(0, 1, 0, yaw*2*3.14159*(1/360.0));
-    q3 = quaternion_axis_angle(0, 0, 1, roll*2*3.14159*(1/360.0));
-    q4 = quaternion_multiply(q1, quaternion_multiply(q2, q3));
-    pitch = 0;
-    yaw = 0;
-    roll = 0;
-    q = quaternion_multiply(q4, q); // swap?
-    quaternion_rotation_matrix(q, m);
-    glMultMatrixf(m);
-    
-    //glTranslatef( 0.0, 0.0, -5);
-    glTranslatef( xpos, ypos, zpos);
-    
-    //q = quaternion_axis_angle(1, 0, 0, angle*2*3.14159*(1/360.0));
-    //quaternion_rotation_matrix(q, m);
-    srand(time(0));
-    //glRotatef(-1*angle, 1, 0, 0);
-    //glMultMatrixf(m);
-    //glMultMatrixf(m);
-
-    //    if( should_rotate ) {
-
-        if( ++angle > 360.0f ) {
-            angle = 0.0f;
-        }
-
-	//    }
-    
-	int x,y,z;
-	srand(73);
-	for(x=-10;x<=10;x++){
-	for(y=-10;y<=10;y++){
-	for(z=-10;z<=10;z++){
-
-	    glPushMatrix();
-	    glTranslatef(x*2,y*2,z*2);
-
-    /* Send our triangle data to the pipeline. */
-    glBegin( GL_TRIANGLES );
-
-     if(rand()%7==3){
-    glColor4ubv( red );
-    glVertex3fv( v0 );
-    glColor4ubv( green );
-    glVertex3fv( v1 );
-    glColor4ubv( blue );
-    glVertex3fv( v2 );
-	} if(rand()%7==3){
-
-    glColor4ubv( red );
-    glVertex3fv( v0 );
-    glColor4ubv( blue );
-    glVertex3fv( v2 );
-    glColor4ubv( white );
-    glVertex3fv( v3 );
-	} if(rand()%7==3){
-
-    glColor4ubv( green );
-    glVertex3fv( v1 );
-    glColor4ubv( black );
-    glVertex3fv( v5 );
-    glColor4ubv( orange );
-    glVertex3fv( v6 );
-	} if(rand()%7==3){
-
-    glColor4ubv( green );
-    glVertex3fv( v1 );
-    glColor4ubv( orange );
-    glVertex3fv( v6 );
-    glColor4ubv( blue );
-    glVertex3fv( v2 );
-	} if(rand()%7==3){
-
-    glColor4ubv( black );
-    glVertex3fv( v5 );
-    glColor4ubv( yellow );
-    glVertex3fv( v4 );
-    glColor4ubv( purple );
-    glVertex3fv( v7 );
-	} if(rand()%7==3){
-
-    glColor4ubv( black );
-    glVertex3fv( v5 );
-    glColor4ubv( purple );
-    glVertex3fv( v7 );
-    glColor4ubv( orange );
-    glVertex3fv( v6 );
-	} if(rand()%7==3){
-
-    glColor4ubv( yellow );
-    glVertex3fv( v4 );
-    glColor4ubv( red );
-    glVertex3fv( v0 );
-    glColor4ubv( white );
-    glVertex3fv( v3 );
-	} if(rand()%7==3){
-
-    glColor4ubv( yellow );
-    glVertex3fv( v4 );
-    glColor4ubv( white );
-    glVertex3fv( v3 );
-    glColor4ubv( purple );
-    glVertex3fv( v7 );
-	} if(rand()%7==3){
-
-    glColor4ubv( white );
-    glVertex3fv( v3 );
-    glColor4ubv( blue );
-    glVertex3fv( v2 );
-    glColor4ubv( orange );
-    glVertex3fv( v6 );
-	} if(rand()%7==3){
-
-    glColor4ubv( white );
-    glVertex3fv( v3 );
-    glColor4ubv( orange );
-    glVertex3fv( v6 );
-    glColor4ubv( purple );
-    glVertex3fv( v7 );
-	} if(rand()%7==3){
-
-    glColor4ubv( green );
-    glVertex3fv( v1 );
-    glColor4ubv( red );
-    glVertex3fv( v0 );
-    glColor4ubv( yellow );
-    glVertex3fv( v4 );
-	} if(rand()%7==3){
-
-    glColor4ubv( green );
-    glVertex3fv( v1 );
-    glColor4ubv( yellow );
-    glVertex3fv( v4 );
-    glColor4ubv( black );
-    glVertex3fv( v5 );
-     }
-    glEnd( );
-
-	    glPopMatrix();
-}
-}
+void init(void) {
+  tabbed_out = 0;
+  
+  m.w = 4;
+  m.h = 3;
+  m.d = 5;
+  m.cells = malloc(m.w*m.h*m.d*sizeof(cell));
+  init_maze(&m);
+  generate_maze(&m,0,0,0);
+  
+  //
+  
+  glClearColor(0, 0, 0, 0);
+  glEnable(GL_FLAT);
+  glEnable(GL_DEPTH_TEST);
+  glEnable(GL_CULL_FACE);
+  glEnable(GL_LIGHTING);
+  glShadeModel(GL_FLAT);
+  glEnable(GL_LIGHT0);
+  
+  glViewport(0, 0, 640, 480);
+  
+  glMatrixMode(GL_PROJECTION);
+  gluPerspective(60.0, 4.0/3.0, 0.5, 1024.0);
+  
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
 }
 
-    /*
-     * EXERCISE:
-     * Draw text telling the user that 'Spc'
-     * pauses the rotation and 'Esc' quits.
-     * Do it using vetors and textured quads.
-     */
+float t = 0;
 
-    /*
-     * Swap the buffers. This this tells the driver to
-     * render the next frame from the contents of the
-     * back-buffer, and to set all rendering operations
-     * to occur on what was the front-buffer.
-     *
-     * Double buffering prevents nasty visual tearing
-     * from the application drawing on areas of the
-     * screen that are being updated at the same time.
-     */
-    SDL_GL_SwapBuffers( );
+void draw_wall(cube_side dir) {
+  switch(dir) {
+  case cube_front:
+    glNormal3f(0,0,1);
+    glVertex3f(-0.5,-0.5,-0.5);
+    glVertex3f( 0.5,-0.5,-0.5);
+    glVertex3f( 0.5, 0.5,-0.5);
+    glVertex3f(-0.5, 0.5,-0.5);
+    break;
+  case cube_back:
+    glNormal3f(0,0,-1);
+    glColor3f(1,0,0);
+    glVertex3f(-0.5,-0.5,0.5);
+    glVertex3f(-0.5, 0.5,0.5);
+    glVertex3f( 0.5, 0.5,0.5);
+    glVertex3f( 0.5,-0.5,0.5);
+    break;
+  case cube_left:
+    glNormal3f(1,0,0);
+    glColor3f(1,0,0);
+    glVertex3f(-0.5,-0.5,-0.5);
+    glVertex3f(-0.5, 0.5,-0.5);
+    glVertex3f(-0.5, 0.5, 0.5);
+    glVertex3f(-0.5,-0.5, 0.5);
+    break;
+  case cube_right:
+    glNormal3f(-1,0,0);
+    glColor3f(1,0,0);
+    glVertex3f(0.5,-0.5,-0.5);
+    glVertex3f(0.5,-0.5, 0.5);
+    glVertex3f(0.5, 0.5, 0.5);
+    glVertex3f(0.5, 0.5,-0.5);
+    break;
+  case cube_bottom:
+    glNormal3f(0,1,0);
+    glColor3f(1,0,0);
+    glVertex3f(-0.5,-0.5, 0.5);
+    glVertex3f( 0.5,-0.5, 0.5);
+    glVertex3f( 0.5,-0.5,-0.5);
+    glVertex3f(-0.5,-0.5,-0.5);
+    break;
+  case cube_top:
+    glNormal3f(0,-1,0);
+    glColor3f(1,0,0);
+    glVertex3f(-0.5,0.5, 0.5);
+    glVertex3f(-0.5,0.5,-0.5);
+    glVertex3f( 0.5,0.5,-0.5);
+    glVertex3f( 0.5,0.5, 0.5);
+    break;
+  }
+}
+
+void draw(void) {
+  int x,y,z;
+  cube_side d;
+  
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  
+  glLoadIdentity();
+  glTranslatef(0,0,-10);
+  glRotatef(t,0,1,0.01);
+  glTranslatef(-m.w/2.0,-m.h/2.0,-m.d/2.0);
+  
+  for(x=0; x<m.w; x++) {
+    for(y=0; y<m.h; y++) {
+      for(z=0; z<m.d; z++) {
+	glPushMatrix();
+	glTranslatef(x,y,z);
+	for(d=0; d<6; d++) {
+	  if(m.cells[cell_array(m.w,m.h,x,y,z)].wall[d]) {
+	    glBegin(GL_QUADS);
+	    draw_wall(d);
+	    glEnd();
+	  }
+	}
+	glPopMatrix();
+      }
+    }
+  }
+  printf("\n");
+  
+  SDL_GL_SwapBuffers();
 }
 
 void update(float dt) {
-  printf("%f\n", dt);
-  float movespeed = 12;
-  float turnspeed = 0.5*360.0;
-
-  float x,y,z;
-  
-  if(forwardkey && !backkey) {
-    x = 0; y = 0; z = 1;
-    quaternion_rotate_vector(q, &x, &y, &z);
-    xpos += x*movespeed*dt;
-    ypos += y*movespeed*dt;
-    zpos += z*movespeed*dt;
-  }
-  if(backkey && !forwardkey) zpos -= movespeed*dt;
-  if(leftkey && !rightkey) xpos -= movespeed*dt;
-  if(rightkey && !leftkey) xpos += movespeed*dt;
-  if(upkey && !downkey) ypos += movespeed*dt;
-  if(downkey && !upkey) ypos -= movespeed*dt;
-  if(banklkey && !bankrkey) roll += turnspeed*dt;
-  if(bankrkey && !banklkey) roll -= turnspeed*dt;
+  //printf("%f\n", dt);
+  t += dt*30;
 }
 
-void draw() {
-  //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+void handle_event(SDL_Event event) {
   
-  draw_screen();
-  
-  //SDL_GL_SwapBuffers();
 }
 
 int main(int argc, char *argv[]) {
@@ -264,7 +140,7 @@ int main(int argc, char *argv[]) {
   Uint32 last_draw_time, time_difference, target_delay;
   int ignore_mouse_events;
   
-  target_delay = 16;
+  target_delay = 16; // aim for 1000/16 = 62 fps
   time_difference = target_delay;
   
   if(SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO) < 0) {
@@ -280,49 +156,11 @@ int main(int argc, char *argv[]) {
   }
   
   SDL_ShowCursor(0);
-  SDL_WM_GrabInput( SDL_GRAB_ON );
+  SDL_WM_GrabInput(SDL_GRAB_ON);
   ignore_mouse_events = 1; // warping the mouse produces a huge mouse movement
   
-  q = quaternion_axis_angle(0, 0, 0, 0);
-  pitch = 0;
-  yaw = 0;
-  xpos = 0;
-  ypos = 0;
-  zpos = 0;
-  forwardkey = 0;
-  backkey = 0;
-  leftkey = 0;
-  rightkey = 0;
-  upkey = 0;
-  downkey = 0;
-  
-    /* Our shading model--Gouraud (smooth). */
-    glShadeModel( GL_SMOOTH );
-
-    /* Culling. */
-    glCullFace( GL_BACK );
-    glFrontFace( GL_CCW );
-    glEnable( GL_CULL_FACE );
-
-    /* Set the clear color. */
-    glClearColor( 0, 0, 0, 0 );
-
-    /* Setup our viewport. */
-    glViewport( 0, 0, 640, 480 );
-
-    /*
-     * Change to the projection matrix and set
-     * our viewing volume.
-     */
-    glMatrixMode( GL_PROJECTION );
-    glLoadIdentity( );
-    /*
-     * EXERCISE:
-     * Replace this with a call to glFrustum.
-     */
-    gluPerspective( 60.0, 640.0/480.0, 1.0, 1024.0 );
-    
-    float motion_factor = 0.05*2*3.14159;
+  init();
+  draw();
   
   while(1) {
     // immediately after drawing
@@ -334,78 +172,38 @@ int main(int argc, char *argv[]) {
       case SDL_QUIT:
 	exit(0);
 	break;
-      case SDL_MOUSEMOTION:
-	if(!ignore_mouse_events) {
-	  pitch += event.motion.yrel*motion_factor;
-	  yaw += event.motion.xrel*motion_factor;
-	}
-	else
-	  ignore_mouse_events--;
-	break;
       case SDL_KEYDOWN:
 	switch(event.key.keysym.sym) {
 	case SDLK_ESCAPE:
 	  exit(0);
 	  break;
-	case SDLK_a:
-	  leftkey = 1;
-	  break;
-	case SDLK_d:
-	  rightkey = 1;
-	  break;
-	case SDLK_w:
-	  forwardkey = 1;
-	  break;
-	case SDLK_s:
-	  backkey = 1;
-	  break;
-	case SDLK_r:
-	  upkey = 1;
-	  break;
-	case SDLK_f:
-	  downkey = 1;
-	  break;
-	case SDLK_q:
-	  banklkey = 1;
-	  break;
-	case SDLK_e:
-	  bankrkey = 1;
+	case SDLK_TAB:
+	  tabbed_out = !tabbed_out;
+	  if(tabbed_out) {
+	    SDL_ShowCursor(1);
+	    SDL_WM_GrabInput(SDL_GRAB_OFF);
+	  }
+	  else {
+	    SDL_ShowCursor(0);
+	    SDL_WM_GrabInput(SDL_GRAB_ON);
+	    ignore_mouse_events = 1;
+	  }
 	  break;
 	}
-	break;
-      case SDL_KEYUP:
-	switch(event.key.keysym.sym) {
-	case SDLK_a:
-	  leftkey = 0;
-	  break;
-	case SDLK_d:
-	  rightkey = 0;
-	  break;
-	case SDLK_w:
-	  forwardkey = 0;
-	  break;
-	case SDLK_s:
-	  backkey = 0;
-	  break;
-	case SDLK_r:
-	  upkey = 0;
-	  break;
-	case SDLK_f:
-	  downkey = 0;
-	  break;
-	case SDLK_q:
-	  banklkey = 0;
-	  break;
-	case SDLK_e:
-	  bankrkey = 0;
-	  break;
+      case SDL_MOUSEMOTION:
+	if(tabbed_out) break;
+	if(ignore_mouse_events) {
+	  ignore_mouse_events--;
+	  //break;
 	}
+      default:
+	handle_event(event);
 	break;
       }
     }
     
     // update
-    printf("%d time_difference\n", time_difference);
+    //printf("%d time_difference\n", time_difference);
     update(time_difference/1000.0);
     
     // delay
@@ -419,7 +217,6 @@ int main(int argc, char *argv[]) {
     }
     
     // draw
-    //DrawPixel(screen, rand()%640, rand()%480, rand()%255, rand()%255, rand()%255);
     draw();
   }
   
