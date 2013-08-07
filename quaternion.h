@@ -1,3 +1,5 @@
+// License: GPLv3
+
 typedef struct {
   double w,x,y,z;
 } quaternion;

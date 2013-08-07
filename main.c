@@ -1,3 +1,5 @@
+// License: GPLv3
+
 #include <stdlib.h>
 #include <GL/gl.h>
 #include <GL/glu.h>

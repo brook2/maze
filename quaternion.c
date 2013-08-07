@@ -1,3 +1,5 @@
+// License: GPLv3
+
 #include <math.h>
 
 #include "quaternion.h"

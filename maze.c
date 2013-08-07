@@ -1,3 +1,5 @@
+// License: GPLv3
+
 #include "maze.h"
 
 int cell_array(int w,int h,int x,int y,int z) {
